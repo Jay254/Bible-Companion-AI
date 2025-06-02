@@ -1,0 +1,135 @@
+import { useState } from 'react'
+import './Search.css'
+
+// List of Bible books
+const BIBLE_BOOKS = [
+  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
+  'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
+  '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra',
+  'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs',
+  'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations',
+  'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos',
+  'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk',
+  'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
+  'Matthew', 'Mark', 'Luke', 'John', 'Acts',
+  'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians',
+  'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy',
+  '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James',
+  '1 Peter', '2 Peter', '1 John', '2 John', '3 John',
+  'Jude', 'Revelation'
+]
+
+interface SearchFormData {
+  book: string
+  chapter: string
+  verse: string
+}
+
+export function Search() {
+  const [formData, setFormData] = useState<SearchFormData>({
+    book: '',
+    chapter: '',
+    verse: ''
+  })
+  const [errors, setErrors] = useState<Partial<SearchFormData>>({})
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<SearchFormData> = {}
+    
+    if (!formData.book) {
+      newErrors.book = 'Please select a book'
+    }
+    if (!formData.chapter) {
+      newErrors.chapter = 'Chapter is required'
+    } else if (isNaN(Number(formData.chapter)) || Number(formData.chapter) < 1) {
+      newErrors.chapter = 'Please enter a valid chapter number'
+    }
+    if (!formData.verse) {
+      newErrors.verse = 'Verse is required'
+    } else if (isNaN(Number(formData.verse)) || Number(formData.verse) < 1) {
+      newErrors.verse = 'Please enter a valid verse number'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validateForm()) {
+      // TODO: Implement verse search
+      console.log('Searching for:', formData)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+    // Clear error when user starts typing
+    if (errors[name as keyof SearchFormData]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }))
+    }
+  }
+
+  return (
+    <div className="search-page">
+      <h2>Search Bible Verses</h2>
+      <form className="search-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="book">Book</label>
+          <select
+            id="book"
+            name="book"
+            value={formData.book}
+            onChange={handleChange}
+            className={errors.book ? 'error' : ''}
+          >
+            <option value="">Select a book</option>
+            {BIBLE_BOOKS.map(book => (
+              <option key={book} value={book}>{book}</option>
+            ))}
+          </select>
+          {errors.book && <span className="error-message">{errors.book}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="chapter">Chapter</label>
+          <input
+            type="number"
+            id="chapter"
+            name="chapter"
+            value={formData.chapter}
+            onChange={handleChange}
+            min="1"
+            className={errors.chapter ? 'error' : ''}
+          />
+          {errors.chapter && <span className="error-message">{errors.chapter}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="verse">Verse</label>
+          <input
+            type="number"
+            id="verse"
+            name="verse"
+            value={formData.verse}
+            onChange={handleChange}
+            min="1"
+            className={errors.verse ? 'error' : ''}
+          />
+          {errors.verse && <span className="error-message">{errors.verse}</span>}
+        </div>
+
+        <button type="submit" className="search-button">
+          Search Verse
+        </button>
+      </form>
+    </div>
+  )
+} 

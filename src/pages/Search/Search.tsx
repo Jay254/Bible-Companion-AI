@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { VerseDisplay } from '../../components/VerseDisplay/VerseDisplay'
+import { fetchBibleVerse } from '../../services/bibleApi'
 import './Search.css'
 
 // List of Bible books
@@ -25,6 +27,12 @@ interface SearchFormData {
   verse: string
 }
 
+interface VerseData {
+  reference: string
+  text: string
+  translation: string
+}
+
 export function Search() {
   const [formData, setFormData] = useState<SearchFormData>({
     book: '',
@@ -32,6 +40,9 @@ export function Search() {
     verse: ''
   })
   const [errors, setErrors] = useState<Partial<SearchFormData>>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>()
+  const [verseData, setVerseData] = useState<VerseData>()
 
   const validateForm = (): boolean => {
     const newErrors: Partial<SearchFormData> = {}
@@ -54,11 +65,21 @@ export function Search() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(undefined)
+    setVerseData(undefined)
+
     if (validateForm()) {
-      // TODO: Implement verse search
-      console.log('Searching for:', formData)
+      setIsLoading(true)
+      try {
+        const verse = await fetchBibleVerse(formData.book, formData.chapter, formData.verse)
+        setVerseData(verse)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -126,10 +147,26 @@ export function Search() {
           {errors.verse && <span className="error-message">{errors.verse}</span>}
         </div>
 
-        <button type="submit" className="search-button">
-          Search Verse
+        <button type="submit" className="search-button" disabled={isLoading}>
+          {isLoading ? 'Searching...' : 'Search Verse'}
         </button>
       </form>
+
+      {verseData && (
+        <VerseDisplay
+          reference={verseData.reference}
+          text={verseData.text}
+          translation={verseData.translation}
+        />
+      )}
+
+      <VerseDisplay
+        isLoading={isLoading}
+        error={error}
+        reference=""
+        text=""
+        translation=""
+      />
     </div>
   )
 } 

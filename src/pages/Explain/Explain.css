@@ -138,4 +138,16 @@
   .explain-form {
     padding: 1.5rem;
   }
+}
+
+.explanation-text h1, .explanation-text h2, .explanation-text h3 {
+  color: #2c3e50;
+}
+
+.explanation-text strong {
+  font-weight: bold;
+}
+
+.explanation-text em {
+  font-style: italic;
 } 

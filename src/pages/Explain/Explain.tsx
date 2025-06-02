@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import { getScriptureExplanation } from '../../services/aiService'
 import './Explain.css'
 
 interface ExplanationFormData {
@@ -32,15 +34,13 @@ export function Explain() {
 
     setIsLoading(true)
     try {
-      // TODO: Replace with actual AI API call
-      // Simulating API call for now
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await getScriptureExplanation(formData.scripture, formData.question)
       setExplanation({
-        answer: `This is a simulated explanation for the scripture: "${formData.scripture}"\n\nQuestion: ${formData.question}\n\nIn the next step, we'll integrate with an actual AI service to provide meaningful explanations.`,
+        answer: response.answer,
         scripture: formData.scripture
       })
-    } catch (err) {
-      setError('Failed to get explanation. Please try again.')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to get explanation. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -114,9 +114,9 @@ export function Explain() {
               <strong>Scripture:</strong> {explanation.scripture}
             </div>
             <div className="explanation-text">
-              {explanation.answer.split('\n').map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+              <ReactMarkdown>
+                {explanation.answer}
+              </ReactMarkdown>
             </div>
           </div>
         </div>

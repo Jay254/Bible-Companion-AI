@@ -1,44 +1,45 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import type { ChatHistoryMessage } from '../../services/aiService'
 import { getScriptureExplanation } from '../../services/aiService'
 import './Explain.css'
 
-interface ExplanationFormData {
-  scripture: string
-  question: string
-}
-
-interface ExplanationData {
-  answer: string
-  scripture: string
+interface ChatMessage {
+  role: 'user' | 'ai'
+  content: string
 }
 
 export function Explain() {
-  const [formData, setFormData] = useState<ExplanationFormData>({
-    scripture: '',
-    question: ''
-  })
+  const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
-  const [explanation, setExplanation] = useState<ExplanationData>()
+  const [chat, setChat] = useState<ChatMessage[]>([])
+  const chatEndRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chat, isLoading])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(undefined)
-    setExplanation(undefined)
-
-    if (!formData.scripture.trim() || !formData.question.trim()) {
-      setError('Please provide both scripture and your question')
+    if (!message.trim()) {
+      setError('Please enter your question or verse. For example: "What does John 3:16 mean?"')
       return
     }
-
+    const newChat: ChatMessage[] = [
+      ...chat,
+      { role: 'user', content: message }
+    ]
+    setChat(newChat)
     setIsLoading(true)
+    setMessage('')
     try {
-      const response = await getScriptureExplanation(formData.scripture, formData.question)
-      setExplanation({
-        answer: response.answer,
-        scripture: formData.scripture
-      })
+      const response = await getScriptureExplanation(newChat as ChatHistoryMessage[])
+      setChat(prev => [
+        ...prev,
+        { role: 'ai', content: response.answer }
+      ])
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to get explanation. Please try again.')
     } finally {
@@ -46,81 +47,65 @@ export function Explain() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
   return (
-    <div className="explain-page">
-      <h2>Get Scripture Explanations</h2>
+    <div className="explain-page chat-mode">
+      <h2>Bible Companion Chat</h2>
       <p className="explain-intro">
-        Enter a Bible verse and your question to receive an AI-powered explanation.
+        Ask any question about the Bible, or type a verse and your question in one message. The AI will understand and respond contextually!
       </p>
-
-      <form className="explain-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="scripture">Bible Verse</label>
-          <textarea
-            id="scripture"
-            name="scripture"
-            value={formData.scripture}
-            onChange={handleChange}
-            placeholder="Enter the Bible verse you want explained..."
-            rows={3}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="question">Your Question</label>
-          <textarea
-            id="question"
-            name="question"
-            value={formData.question}
-            onChange={handleChange}
-            placeholder="What would you like to understand about this verse?"
-            rows={4}
-            required
-          />
-        </div>
-
-        <button type="submit" className="explain-button" disabled={isLoading}>
-          {isLoading ? 'Getting Explanation...' : 'Get Explanation'}
-        </button>
-      </form>
-
-      {isLoading && (
-        <div className="explanation-display loading">
-          <div className="loading-spinner"></div>
-          <p>Generating explanation...</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="explanation-display error">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {explanation && (
-        <div className="explanation-display">
-          <div className="explanation-content">
-            <h3>Explanation</h3>
-            <div className="scripture-reference">
-              <strong>Scripture:</strong> {explanation.scripture}
+      <div className="chat-window">
+        {chat.length === 0 && (
+          <div className="chat-placeholder">
+            <p>Try: <em>What does John 3:16 mean?</em> or <em>Explain "In the beginning God created the heavens and the earth"</em></p>
+          </div>
+        )}
+        {chat.map((msg, idx) => (
+          <div key={idx} className={`chat-bubble ${msg.role}`}> 
+            <div className="chat-avatar">
+              {msg.role === 'user' ? '🧑' : '📖'}
             </div>
-            <div className="explanation-text">
-              <ReactMarkdown>
-                {explanation.answer}
-              </ReactMarkdown>
+            <div className="bubble-content">
+              <div className={`chat-meta ${msg.role === 'user' ? 'user-meta' : 'ai-meta'}`}>{msg.role === 'user' ? 'You' : 'Bible Companion AI'}</div>
+              <div className="chat-content">
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              </div>
             </div>
           </div>
+        ))}
+        {isLoading && (
+          <div className="chat-bubble ai loading">
+            <div className="chat-avatar">📖</div>
+            <div className="bubble-content">
+              <div className="chat-meta ai-meta">
+                Bible Companion AI
+              </div>
+              <div className="chat-content">
+                <div className="loading-spinner"></div>
+                <span>Thinking...</span>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+      <form className="chat-form" onSubmit={handleSubmit} autoComplete="off">
+        <div className="form-row">
+          <textarea
+            placeholder="Type your question or verse here... (e.g. What does John 3:16 mean?)"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            className="chat-input question-input"
+            rows={2}
+            disabled={isLoading}
+            required
+          />
+          <button type="submit" className="explain-button" disabled={isLoading}>
+            <span>Send</span>
+            <span className="send-icon">✈️</span>
+          </button>
         </div>
-      )}
+        {error && <div className="explanation-display error"><p>{error}</p></div>}
+      </form>
     </div>
   )
 } 

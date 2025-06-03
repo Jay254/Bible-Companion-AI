@@ -2,25 +2,44 @@ interface AIExplanationResponse {
   answer: string
 }
 
-export async function getScriptureExplanation(scripture: string, question: string): Promise<AIExplanationResponse> {
+export type ChatHistoryMessage = {
+  role: 'user' | 'ai';
+  content: string;
+}
+
+export async function getScriptureExplanation(
+  chatHistory: ChatHistoryMessage[]
+): Promise<AIExplanationResponse> {
   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
   if (!GROQ_API_KEY) {
     throw new Error('Groq API key is not configured')
   }
 
-  const prompt = `You are a knowledgeable Bible scholar and teacher. Please provide a clear and insightful explanation of the following Bible verse, addressing the specific question asked.
+  // Improved system prompt for a conversational, context-aware, biblically accurate chat
+  const systemPrompt = `You are Bible Companion AI, a friendly, knowledgeable, and context-aware Bible study assistant. You help users understand Bible verses and answer their questions with:
+- Clear, conversational explanations
+- Accurate biblical context and references
+- Respect for diverse Christian traditions
+- Encouragement for deeper study and reflection
 
-Scripture: "${scripture}"
-Question: "${question}"
+When a user asks about a verse, provide:
+1. The verse (if not already quoted)
+2. Historical and literary context
+3. A breakdown of key phrases or words
+4. Insights from Christian tradition (if relevant)
+5. A direct, thoughtful answer to the user's question
+6. A warm, encouraging tone
 
-Please provide an explanation that:
-1. Is accurate to biblical teachings
-2. Is easy to understand
-3. Provides relevant context
-4. Addresses the specific question asked
-5. Is respectful and appropriate
+If the user asks a follow-up, use the previous conversation for context. If the user refers to "this verse" or "it," use the last discussed verse.`
 
-Explanation:`
+  // Convert chat history to OpenAI/Groq format
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...chatHistory.map((msg) => ({
+      role: msg.role === 'ai' ? 'assistant' : 'user',
+      content: msg.content,
+    })),
+  ]
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -31,21 +50,11 @@ Explanation:`
       },
       body: JSON.stringify({
         model: 'llama3-70b-8192',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a knowledgeable Bible scholar and teacher who provides clear, accurate, and insightful explanations of biblical texts.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 1000,
       }),
     })
-    // console.log(response)
 
     if (!response.ok) {
       throw new Error('Failed to get AI explanation')

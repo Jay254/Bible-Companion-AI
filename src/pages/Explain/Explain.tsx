@@ -14,11 +14,18 @@ export function Explain() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
   const [chat, setChat] = useState<ChatMessage[]>([])
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chat, isLoading])
+
+  const handleCopy = (content: string, idx: number) => {
+    navigator.clipboard.writeText(content)
+    setCopiedIdx(idx)
+    setTimeout(() => setCopiedIdx(null), 1500)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,6 +75,19 @@ export function Explain() {
               <div className={`chat-meta ${msg.role === 'user' ? 'user-meta' : 'ai-meta'}`}>{msg.role === 'user' ? 'You' : 'Bible Companion AI'}</div>
               <div className="chat-content">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
+                {msg.role === 'ai' && (
+                  <button
+                    className="copy-btn"
+                    onClick={() => handleCopy(msg.content, idx)}
+                    title="Copy explanation"
+                    style={{ marginTop: '0.5rem' }}
+                  >
+                    📋
+                  </button>
+                )}
+                {msg.role === 'ai' && copiedIdx === idx && (
+                  <span className="copy-tooltip">Copied!</span>
+                )}
               </div>
             </div>
           </div>

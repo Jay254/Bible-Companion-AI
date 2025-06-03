@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './VerseDisplay.css'
 
 interface VerseDisplayProps {
@@ -9,6 +10,14 @@ interface VerseDisplayProps {
 }
 
 export function VerseDisplay({ reference, text, translation, isLoading, error }: VerseDisplayProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`${reference}\n${text}\n(${translation})`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
   if (isLoading) {
     return (
       <div className="verse-display loading">
@@ -33,7 +42,13 @@ export function VerseDisplay({ reference, text, translation, isLoading, error }:
   return (
     <div className="verse-display">
       <div className="verse-content">
-        <h3 className="verse-reference">{reference}</h3>
+        <div className="verse-header">
+          <h3 className="verse-reference">{reference}</h3>
+          <button className="copy-btn" onClick={handleCopy} title="Copy verse">
+            📋
+          </button>
+          {copied && <span className="copy-tooltip">Copied!</span>}
+        </div>
         <p className="verse-text">{text}</p>
         <p className="verse-translation">{translation}</p>
       </div>

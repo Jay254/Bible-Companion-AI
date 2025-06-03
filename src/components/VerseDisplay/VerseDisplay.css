@@ -56,4 +56,38 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.verse-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #3498db;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.copy-btn:hover,
+.copy-btn:focus {
+  background: #eaf6ff;
+}
+
+.copy-tooltip {
+  margin-left: 0.5rem;
+  color: #217dbb;
+  font-size: 0.95rem;
+  background: #eaf6ff;
+  border-radius: 4px;
+  padding: 0.1rem 0.5rem;
+  animation: fadeIn 0.2s;
 } 

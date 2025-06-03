@@ -9,22 +9,84 @@ interface ChatMessage {
   content: string
 }
 
+interface Bookmark {
+  content: string
+  date: string
+}
+
+const BOOKMARKS_KEY = 'bible-companion-bookmarks'
+
+function getBookmarks(): Bookmark[] {
+  try {
+    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function saveBookmarks(bookmarks: Bookmark[]) {
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks))
+}
+
+function cleanEchoedPrompt(aiContent: string, lastUserPrompt: string): string {
+  if (!lastUserPrompt) return aiContent
+  // Remove if AI response starts with the prompt (optionally quoted)
+  const trimmedPrompt = lastUserPrompt.trim()
+  if (aiContent.trim().startsWith(trimmedPrompt)) {
+    return aiContent.trim().slice(trimmedPrompt.length).trimStart()
+  }
+  // Remove if AI response starts with quoted prompt
+  if (aiContent.trim().startsWith('"' + trimmedPrompt + '"')) {
+    return aiContent.trim().slice(trimmedPrompt.length + 2).trimStart()
+  }
+  return aiContent
+}
+
 export function Explain() {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
   const [chat, setChat] = useState<ChatMessage[]>([])
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>(getBookmarks())
+  const [showBookmarks, setShowBookmarks] = useState(false)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chat, isLoading])
 
+  useEffect(() => {
+    saveBookmarks(bookmarks)
+  }, [bookmarks])
+
   const handleCopy = (content: string, idx: number) => {
     navigator.clipboard.writeText(content)
     setCopiedIdx(idx)
     setTimeout(() => setCopiedIdx(null), 1500)
+  }
+
+  const handleBookmark = (content: string, idx?: number) => {
+    // Find the last user message before this AI message
+    let lastUserPrompt = ''
+    if (typeof idx === 'number' && idx > 0) {
+      for (let i = idx - 1; i >= 0; i--) {
+        if (chat[i].role === 'user') {
+          lastUserPrompt = chat[i].content
+          break
+        }
+      }
+    }
+    const cleanedContent = cleanEchoedPrompt(content, lastUserPrompt)
+    if (bookmarks.some(b => b.content === cleanedContent)) return
+    setBookmarks(prev => [
+      { content: cleanedContent, date: new Date().toISOString() },
+      ...prev
+    ])
+  }
+
+  const handleRemoveBookmark = (content: string) => {
+    setBookmarks(prev => prev.filter(b => b.content !== content))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,7 +118,9 @@ export function Explain() {
 
   return (
     <div className="explain-page chat-mode">
-      <h2>Bible Companion Chat</h2>
+      <h2>Bible Companion Chat
+        <button className="bookmark-modal-btn" onClick={() => setShowBookmarks(true)} title="View Bookmarks">⭐</button>
+      </h2>
       <p className="explain-intro">
         Ask any question about the Bible, or type a verse and your question in one message. The AI will understand and respond contextually!
       </p>
@@ -76,14 +140,25 @@ export function Explain() {
               <div className="chat-content">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
                 {msg.role === 'ai' && (
-                  <button
-                    className="copy-btn"
-                    onClick={() => handleCopy(msg.content, idx)}
-                    title="Copy explanation"
-                    style={{ marginTop: '0.5rem' }}
-                  >
-                    📋
-                  </button>
+                  <>
+                    <button
+                      className="copy-btn"
+                      onClick={() => handleCopy(msg.content, idx)}
+                      title="Copy explanation"
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      📋
+                    </button>
+                    <button
+                      className="bookmark-btn"
+                      onClick={() => handleBookmark(msg.content, idx)}
+                      title={bookmarks.some(b => b.content === msg.content) ? 'Bookmarked' : 'Bookmark explanation'}
+                      style={{ marginTop: '0.5rem', marginLeft: '0.5rem', color: bookmarks.some(b => b.content === msg.content) ? '#f1c40f' : '#bbb' }}
+                      disabled={bookmarks.some(b => b.content === msg.content)}
+                    >
+                      {bookmarks.some(b => b.content === msg.content) ? '⭐' : '☆'}
+                    </button>
+                  </>
                 )}
                 {msg.role === 'ai' && copiedIdx === idx && (
                   <span className="copy-tooltip">Copied!</span>
@@ -126,6 +201,29 @@ export function Explain() {
         </div>
         {error && <div className="explanation-display error"><p>{error}</p></div>}
       </form>
+      {showBookmarks && (
+        <div className="bookmark-modal">
+          <div className="bookmark-modal-content">
+            <h3>Your Bookmarks</h3>
+            {bookmarks.length === 0 ? (
+              <p className="bookmark-empty">No bookmarks yet.</p>
+            ) : (
+              <ul className="bookmark-list">
+                {bookmarks.map((b, i) => (
+                  <li key={i} className="bookmark-item">
+                    <div className="bookmark-markdown">
+                      <ReactMarkdown>{b.content}</ReactMarkdown>
+                    </div>
+                    <button className="copy-btn" onClick={() => handleCopy(b.content, -100 - i)} title="Copy bookmark">📋</button>
+                    <button className="remove-btn" onClick={() => handleRemoveBookmark(b.content)} title="Remove bookmark">🗑️</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button className="close-btn" onClick={() => setShowBookmarks(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

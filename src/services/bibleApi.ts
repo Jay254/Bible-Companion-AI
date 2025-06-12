@@ -4,10 +4,6 @@ interface BibleVerse {
   translation: string
 }
 
-interface BibleApiError {
-  message: string
-}
-
 export async function fetchBibleVerse(book: string, chapter: string, verse: string): Promise<BibleVerse> {
   try {
     const response = await fetch(
@@ -24,7 +20,7 @@ export async function fetchBibleVerse(book: string, chapter: string, verse: stri
       text: data.text,
       translation: 'King James Version'
     }
-  } catch (error) {
+  } catch {
     throw new Error('Failed to fetch Bible verse. Please try again.')
   }
 } 

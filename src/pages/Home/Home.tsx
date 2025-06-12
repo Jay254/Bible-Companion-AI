@@ -1,10 +1,8 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
 
 export function Home() {
   const navigate = useNavigate()
-  const [showModal, setShowModal] = useState(false)
 
   return (
     <div className="home">
@@ -38,25 +36,16 @@ export function Home() {
         </div>
         <div
           className="feature-card clickable"
-          onClick={() => setShowModal(true)}
+          onClick={() => navigate('/resources')}
           tabIndex={0}
           role="button"
           aria-label="Study Tools"
-          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setShowModal(true)}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate('/resources')}
         >
           <h3>Study Tools</h3>
           <p>Access cross-references and multiple translations</p>
         </div>
       </section>
-      {showModal && (
-        <div className="home-modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="home-modal" onClick={e => e.stopPropagation()}>
-            <h3>Study Tools & Resources</h3>
-            <p>More study tools and resources are coming soon! Stay tuned.</p>
-            <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   )
 } 

@@ -14,6 +14,7 @@ export function Layout({ children }: LayoutProps) {
           <a href="/">Home</a>
           <a href="/search">Search</a>
           <a href="/explain">Explain</a>
+          <a href="/resources">Resources</a>
         </nav>
       </header>
       

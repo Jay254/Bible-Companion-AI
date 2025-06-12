@@ -1,54 +1,141 @@
-# React + TypeScript + Vite
+# Bible Companion AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, AI-powered Bible study companion built with React, TypeScript, and Vite.  
+Search for Bible verses, ask for AI explanations, bookmark your favorite insights, and keep track of your recent studies—all in a beautiful, responsive interface.
 
-Currently, two official plugins are available:
+![Bible Companion AI Icon](public/bible-ai-icon.svg)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Bible Verse Search:**  
+  Quickly look up any verse by book, chapter, and verse. Recent searches are saved for easy access.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **AI-Powered Explanations:**  
+  Ask questions about any verse or passage. The AI (Llama 3 via Groq API) provides context-aware, conversational, and biblically accurate explanations.
+
+- **Chat Experience:**  
+  Enjoy a chat-like interface for follow-up questions. The AI remembers your conversation for deeper study.
+
+- **Bookmarking:**  
+  Save your favorite verses and AI explanations. View, copy, or remove bookmarks in a modern modal.
+
+- **Copy to Clipboard:**  
+  Instantly copy verses or explanations with a single click.
+
+- **Recent Searches:**  
+  See and revisit your last 10 Bible verse searches. Clear your history anytime.
+
+- **Responsive, Accessible UI:**  
+  Clean layout, modern navigation, and mobile-friendly design.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- npm
+
+### Installation
+
+```bash
+git clone https://github.com/yourusername/bible-companion-ai.git
+cd bible-companion-ai
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the project root with your Groq API key:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
 ```
+VITE_GROQ_API_KEY=your_groq_api_key_here
+```
+
+You can get a Groq API key at [groq.com](https://console.groq.com/).
+
+### Running the App
+
+```bash
+npm run dev
+```
+
+Visit [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## Project Structure
+
+```
+src/
+  components/
+    Layout/         # App layout and navigation
+    VerseDisplay/   # Verse display, copy, and bookmarking
+  pages/
+    Home/           # Welcome and feature overview
+    Search/         # Bible verse search, recent searches, verse bookmarks
+    Explain/        # AI chat, explanation bookmarks
+  services/
+    bibleApi.ts     # Bible verse API integration
+    aiService.ts    # Groq API integration for AI explanations
+  assets/           # Static assets (if any)
+  index.css, App.css, etc.
+public/
+  bible-ai-icon.svg # Custom favicon
+```
+
+---
+
+## Key Technologies
+
+- **React 19** + **TypeScript**
+- **Vite** (fast dev/build)
+- **react-router-dom** (routing)
+- **react-markdown** (rendering AI/verse markdown)
+- **Groq API** (Llama 3 for AI explanations)
+- **Bible API** (for verse lookup)
+- **localStorage** (for bookmarks and recent searches)
+
+---
+
+## Customization
+
+- **Colors:**  
+  Primary color is `#3498db` for buttons, navbar, and highlights.
+
+- **Favicon:**  
+  Custom SVG icon in `public/bible-ai-icon.svg`.
+
+- **Styling:**  
+  All UI is styled with modern, accessible CSS.  
+  You can further customize in the `*.css` files in each component/page.
+
+---
+
+## Contributing
+
+1. Fork the repo and create your branch.
+2. Run `npm run dev` and make your changes.
+3. Add tests or update docs as needed.
+4. Open a pull request!
+
+---
+
+## License
+
+MIT
+
+---
+
+## Credits
+
+- Bible API: [bible-api.com](https://bible-api.com/)
+- AI: [Groq API](https://console.groq.com/)
+- UI: [React](https://react.dev/), [Vite](https://vitejs.dev/)
+
+---
+
+**Enjoy your study with Bible Companion AI!**

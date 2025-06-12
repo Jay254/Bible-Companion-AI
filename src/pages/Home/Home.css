@@ -51,6 +51,62 @@
   line-height: 1.6;
 }
 
+.feature-card.clickable {
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+  outline: none;
+}
+
+.feature-card.clickable:hover,
+.feature-card.clickable:focus {
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.13), 0 1.5px 6px rgba(44,62,80,0.07);
+  transform: translateY(-2px) scale(1.025);
+  border-color: #3498db;
+}
+
+.home-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44, 62, 80, 0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  min-width: 320px;
+  max-width: 95vw;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+  text-align: center;
+  position: relative;
+}
+
+.home-modal h3 {
+  color: #3498db;
+  margin-bottom: 1rem;
+}
+
+.home-modal .close-btn {
+  margin-top: 1.5rem;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.home-modal .close-btn:hover, .home-modal .close-btn:focus {
+  background: #217dbb;
+}
+
 @media (max-width: 768px) {
   .hero h2 {
     font-size: 2rem;

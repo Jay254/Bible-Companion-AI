@@ -5,9 +5,9 @@
 }
 
 .header {
-  background-color: #3498db;
-  color: white;
+  background-color: #fff;
   padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -15,27 +15,28 @@
 
 .header h1 {
   margin: 0;
+  color: #3498db;
   font-size: 1.5rem;
 }
 
 .nav {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
-.nav a {
-  color: white;
+.nav a, .nav Link {
+  color: #2c3e50;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 }
 
-.nav a:hover {
-  color: #217dbb;
+.nav a:hover, .nav Link:hover {
+  color: #3498db;
 }
 
 .main {
-  flex: 1;
+  min-height: calc(100vh - 120px);
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -43,10 +44,10 @@
 }
 
 .footer {
-  background-color: #3498db;
-  color: white;
-  padding: 1rem 2rem;
+  background-color: #f8f9fa;
+  padding: 1rem;
   text-align: center;
+  color: #666;
 }
 
 @media (max-width: 768px) {

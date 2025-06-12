@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './Resources.css'
 
 const resources = [
@@ -40,6 +41,31 @@ const resources = [
 ]
 
 export function Resources() {
+  const [showModal, setShowModal] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    url: '',
+    description: '',
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Here you would typically send the data to your backend
+    setIsSubmitted(true)
+    setFormData({ name: '', url: '', description: '' })
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setIsSubmitted(false)
+  }
+
   return (
     <div className="resources-page">
       <h2>Study Tools & Resources</h2>
@@ -57,8 +83,75 @@ export function Resources() {
         ))}
       </div>
       <div className="suggest-resource">
-        <button className="suggest-btn" onClick={() => alert('Feature coming soon!')}>Suggest a Resource</button>
+        <button className="suggest-btn" onClick={() => setShowModal(true)}>Suggest a Resource</button>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            {!isSubmitted ? (
+              <>
+                <h3>Suggest a Resource</h3>
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="name">Resource Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="e.g., Bible Study Tools"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="url">Website URL</label>
+                    <input
+                      type="url"
+                      id="url"
+                      name="url"
+                      value={formData.url}
+                      onChange={handleChange}
+                      required
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      placeholder="Brief description of the resource..."
+                      rows={4}
+                    />
+                  </div>
+                  <div className="modal-buttons">
+                    <button type="button" className="cancel-btn" onClick={closeModal}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="submit-btn">
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="success-message">
+                <span className="success-icon">✓</span>
+                <h3>Thank You!</h3>
+                <p>Your resource suggestion has been submitted. We will review it soon.</p>
+                <button className="close-success-btn" onClick={closeModal}>
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

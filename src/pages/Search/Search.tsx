@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { VerseDisplay } from '../../components/VerseDisplay/VerseDisplay'
 import { fetchBibleVerse } from '../../services/bibleApi'
 import './Search.css'
@@ -21,6 +21,9 @@ const BIBLE_BOOKS = [
   'Jude', 'Revelation'
 ]
 
+const RECENT_SEARCHES_KEY = 'bible-companion-recent-searches'
+const MAX_RECENT = 10
+
 interface SearchFormData {
   book: string
   chapter: string
@@ -33,6 +36,22 @@ interface VerseData {
   translation: string
 }
 
+interface RecentSearch extends SearchFormData {
+  timestamp: number
+}
+
+function getRecentSearches(): RecentSearch[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]') as RecentSearch[]
+  } catch {
+    return []
+  }
+}
+
+function saveRecentSearches(searches: RecentSearch[]) {
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches))
+}
+
 export function Search() {
   const [formData, setFormData] = useState<SearchFormData>({
     book: '',
@@ -43,6 +62,11 @@ export function Search() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
   const [verseData, setVerseData] = useState<VerseData>()
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(getRecentSearches())
+
+  useEffect(() => {
+    saveRecentSearches(recentSearches)
+  }, [recentSearches])
 
   const validateForm = (): boolean => {
     const newErrors: Partial<SearchFormData> = {}
@@ -75,6 +99,16 @@ export function Search() {
       try {
         const verse = await fetchBibleVerse(formData.book, formData.chapter, formData.verse)
         setVerseData(verse)
+        // Add to recent searches
+        const newSearch: RecentSearch = {
+          ...formData,
+          timestamp: Date.now()
+        }
+        setRecentSearches(prev => {
+          // Remove duplicates (same book, chapter, verse)
+          const filtered = prev.filter(s => !(s.book === newSearch.book && s.chapter === newSearch.chapter && s.verse === newSearch.verse))
+          return [newSearch, ...filtered].slice(0, MAX_RECENT)
+        })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -98,9 +132,36 @@ export function Search() {
     }
   }
 
+  const handleRecentClick = (search: RecentSearch) => {
+    setFormData({ book: search.book, chapter: search.chapter, verse: search.verse })
+    // Optionally, auto-search:
+    // handleSubmit(new Event('submit') as any)
+  }
+
+  const handleClearRecent = () => {
+    setRecentSearches([])
+  }
+
   return (
     <div className="search-page">
       <h2>Search Bible Verses</h2>
+      {recentSearches.length > 0 && (
+        <div className="recent-searches">
+          <div className="recent-header">
+            <span>Recent Searches</span>
+            <button className="clear-recent-btn" onClick={handleClearRecent} title="Clear recent searches">Clear</button>
+          </div>
+          <ul className="recent-list">
+            {recentSearches.map((s, i) => (
+              <li key={i}>
+                <button className="recent-item" onClick={() => handleRecentClick(s)}>
+                  {s.book} {s.chapter}:{s.verse}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <form className="search-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="book">Book</label>

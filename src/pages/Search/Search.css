@@ -87,4 +87,64 @@
   .search-form {
     padding: 1.5rem;
   }
+}
+
+.recent-searches {
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 1rem 1.2rem 0.5rem 1.2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
+}
+
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #3498db;
+  margin-bottom: 0.5rem;
+}
+
+.clear-recent-btn {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.2rem 0.7rem;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.clear-recent-btn:hover, .clear-recent-btn:focus {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.recent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recent-item {
+  background: #fff;
+  border: 1px solid #e0e7ff;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 1rem;
+  color: #3498db;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  font-weight: 500;
+}
+
+.recent-item:hover, .recent-item:focus {
+  background: #eaf6ff;
+  border-color: #3498db;
 } 
